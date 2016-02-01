@@ -6,7 +6,7 @@ public class Percolation {
     private enum Site { BLOCKED, OPEN }
 
     private final Site[] _sites;
-    private final boolean[] _sitesConnectedToBottom;
+    private final boolean[] _sitesRootsConnectedToBottom;
     private final int _topVirtualSiteIndex = 0;
     private final int _gridLineLength;
     private final WeightedQuickUnionUF _unionFind;
@@ -20,7 +20,7 @@ public class Percolation {
         int gridSize = n * n + 1; // + 1 for virtual top side
 
         _sites = new Site[gridSize];
-        _sitesConnectedToBottom = new boolean[gridSize];
+        _sitesRootsConnectedToBottom = new boolean[gridSize];
         _unionFind = new WeightedQuickUnionUF(gridSize);
 
         _sites[_topVirtualSiteIndex] = Site.OPEN;
@@ -31,14 +31,12 @@ public class Percolation {
         // mark all sites in the last row as "connected to bottom"
         int lastRowIndex = gridSize - _gridLineLength;
         for (int i = lastRowIndex; i < gridSize; i++) {
-            _sitesConnectedToBottom[i] = true;
+            _sitesRootsConnectedToBottom[i] = true;
         }
     }
 
-    // open site (row i, column j) if it is not open already
-    public void open(int i, int j) {
-        int row = i;
-        int column = j;
+    // open site (row, column) if it is not open already
+    public void open(int row, int column) {
         isValidRange(row, column);
 
         int siteIndex = getSiteIndex(row, column);
@@ -68,10 +66,8 @@ public class Percolation {
         }
     }
 
-    // is site (row i, column j) open?
-    public boolean isOpen(int i, int j) {
-        int row = i;
-        int column = j;
+    // is site (row, column) open?
+    public boolean isOpen(int row, int column) {
         isValidRange(row, column);
 
         int siteIndex = getSiteIndex(row, column);
@@ -79,9 +75,7 @@ public class Percolation {
     }
 
     // is site (row i, column j) full?
-    public boolean isFull(int i, int j) {
-        int row = i;
-        int column = j;
+    public boolean isFull(int row, int column) {
         isValidRange(row, column);
 
         int siteIndex = getSiteIndex(row, column);
@@ -91,7 +85,7 @@ public class Percolation {
     // does the system percolate?
     public boolean percolates() {
         int rootOfVirtualTop = _unionFind.find(_topVirtualSiteIndex);
-        return _sitesConnectedToBottom[rootOfVirtualTop];
+        return _sitesRootsConnectedToBottom[rootOfVirtualTop];
     }
 
     private void isValidRange(int row, int column) {
@@ -119,11 +113,11 @@ public class Percolation {
         int pRoot = _unionFind.find(p);
         int qRoot = _unionFind.find(q);
 
-        boolean anyOfRootsConnectedToBottom = _sitesConnectedToBottom[pRoot]
-                || _sitesConnectedToBottom[qRoot];
+        boolean anyOfRootsConnectedToBottom = _sitesRootsConnectedToBottom[pRoot]
+                || _sitesRootsConnectedToBottom[qRoot];
 
-        _sitesConnectedToBottom[pRoot] = anyOfRootsConnectedToBottom;
-        _sitesConnectedToBottom[qRoot] = anyOfRootsConnectedToBottom;
+        _sitesRootsConnectedToBottom[pRoot] = anyOfRootsConnectedToBottom;
+        _sitesRootsConnectedToBottom[qRoot] = anyOfRootsConnectedToBottom;
     }
 
     public static void main(String[] args) {
